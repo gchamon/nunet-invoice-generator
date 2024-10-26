@@ -1,28 +1,62 @@
-from jinja2 import Template
-from datetime import datetime
-import calendar
-from dateutil.relativedelta import relativedelta
-import requests
-import csv
 import argparse
+import calendar
+import csv
+from datetime import datetime
 import os
+from typing import Any, Dict, TypedDict
 
-with open("style.css") as style_css_fp:
-    style_css = style_css_fp.read()
+from dateutil.relativedelta import relativedelta
+from jinja2 import Template
+import requests
 
 
-def get_template(filename):
+class ExchangeRate(TypedDict):
+    """Type definition for exchange rate response"""
+
+    conversion_rate: float
+    date: datetime
+
+
+def get_template(filename: str) -> Template:
+    """
+    Read and return a Jinja2 template from a file.
+
+    Args:
+        filename: Path to the template file
+
+    Returns:
+        Jinja2 Template object
+    """
     with open(filename) as fp:
         return Template(fp.read())
 
 
-def write_html(filename, contents):
+def write_html(filename: str, contents: str) -> None:
+    """
+    Write HTML contents to a file.
+
+    Args:
+        filename: Path where the HTML file should be written
+        contents: HTML content to write
+    """
     with open(filename, "w") as html_fp:
         html_fp.write(contents)
 
 
-def render_html_from_template(template_name, invoice_date: datetime, template_data):
-    template_data["style_css"] = style_css
+def render_html_from_template(
+    template_name: str, invoice_date: datetime, template_data: Dict[str, Any]
+) -> None:
+    """
+    Render HTML invoice from a template and save it to a file.
+
+    Args:
+        template_name: Name of the template to use (without extension)
+        invoice_date: Date of the invoice
+        template_data: Dictionary containing data to be rendered in the template
+    """
+    with open("style.css") as style_css_fp:
+        template_data["style_css"] = style_css_fp.read()
+
     template_filename = f"templates/{template_name}.j2"
     os.makedirs(template_name, exist_ok=True)
     html_filename = (
@@ -35,7 +69,16 @@ def render_html_from_template(template_name, invoice_date: datetime, template_da
     write_html(html_filename, html_contents)
 
 
-def get_eur_exchange_rate(requested_date: datetime):
+def get_eur_exchange_rate(requested_date: datetime) -> ExchangeRate:
+    """
+    Get EUR/USD exchange rate from the European Central Bank API.
+
+    Args:
+        requested_date: Date for which to get the exchange rate
+
+    Returns:
+        Dictionary containing the conversion rate and the date it was recorded
+    """
     start_date = requested_date - relativedelta(days=2)
     url = "https://data-api.ecb.europa.eu/service/data/EXR/D.USD.EUR.SP00.A?format=csvdata&startPeriod={start}&endPeriod={end}".format(
         start=start_date.strftime("%Y-%m-%d"),
@@ -50,8 +93,16 @@ def get_eur_exchange_rate(requested_date: datetime):
     }
 
 
-def get_ntx_exchange_rate(requested_date: datetime):
-    # eur/ntx rate
+def get_ntx_exchange_rate(requested_date: datetime) -> ExchangeRate:
+    """
+    Get EUR/NTX exchange rate from CoinMarketCap API.
+
+    Args:
+        requested_date: Date for which to get the exchange rate
+
+    Returns:
+        Dictionary containing the conversion rate and the date it was recorded
+    """
     start_date = requested_date - relativedelta(days=2)
     url = "https://api.coinmarketcap.com/data-api/v3.1/cryptocurrency/historical?id=13198&convertId=2790&timeStart={start}&timeEnd={end}&interval=1d".format(
         start=int(start_date.timestamp()), end=int(requested_date.timestamp())
@@ -64,17 +115,51 @@ def get_ntx_exchange_rate(requested_date: datetime):
     }
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-d", "--date", required=True, type=str)
-    parser.add_argument(
-        "-i", "--first-invoice-date", required=False, type=str, default="2024-03-01"
+def main() -> None:
+    """
+    Main function to generate invoices with currency conversions.
+
+    This script generates two types of invoices (token and fiat) based on input parameters.
+    It fetches current exchange rates and generates HTML invoices using templates.
+
+    Command line arguments:
+        -d, --date: Invoice date (YYYY-MM-DD format)
+        -i, --first-invoice-date: Date of first invoice (default: 2024-03-01)
+        -t, --token-amount-usd: Amount in USD for token payment (default: 1500)
+        -f, --fiat-amount-usd: Amount in USD for fiat payment (default: 3500)
+
+    Raises:
+        Exception: If requested date is before the first invoice date
+    """
+    parser = argparse.ArgumentParser(
+        description="Generate token and fiat invoices with currency conversions"
     )
     parser.add_argument(
-        "-t", "--token-amount-usd", required=False, type=int, default=1500
+        "-d", "--date", required=True, type=str, help="Invoice date (YYYY-MM-DD)"
     )
     parser.add_argument(
-        "-f", "--fiat-amount-usd", required=False, type=int, default=3500
+        "-i",
+        "--first-invoice-date",
+        required=False,
+        type=str,
+        default="2024-03-01",
+        help="Date of first invoice (default: 2024-03-01)",
+    )
+    parser.add_argument(
+        "-t",
+        "--token-amount-usd",
+        required=False,
+        type=int,
+        default=1500,
+        help="Amount in USD for token payment (default: 1500)",
+    )
+    parser.add_argument(
+        "-f",
+        "--fiat-amount-usd",
+        required=False,
+        type=int,
+        default=3500,
+        help="Amount in USD for fiat payment (default: 3500)",
     )
     args = parser.parse_args()
     token_amount_usd = args.token_amount_usd
