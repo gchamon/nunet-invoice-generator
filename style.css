@@ -1,0 +1,66 @@
+.invoice-container {
+    max-width: 800px;
+    margin: 20px auto;
+    font-family: Arial, sans-serif;
+}
+
+.header {
+    text-align: center;
+}
+
+.title {
+    text-align: center;
+    text-decoration: underline;
+}
+
+.flex-container {
+    display: flex;
+    justify-content: center;
+}
+
+.address {
+    margin-bottom: 5px;
+    border-width: 1px;
+    border: solid;
+    padding: 0px 200px 0px 10px;
+}
+
+.details {
+    margin-bottom: 5px;
+    border-width: 1px;
+    border: solid;
+    text-align: center;
+    padding: 0px 50px 0px 50px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 20px 0;
+}
+
+th {
+    background: #c1c1c1;
+}
+
+th,
+td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.disclaimer {
+    text-align: center;
+}
+
+.disclaimer #declaration {
+    font-weight: bold;
+    font-style: italic;
+}
+
+.wallet-details {
+    margin-top: 20px;
+    word-break: break-all;
+}

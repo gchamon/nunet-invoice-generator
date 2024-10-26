@@ -1,0 +1,98 @@
+{# Base invoice template for crypto payment #}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        {{ style_css }}
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <div class="header">
+            <h1>GABRIEL CHAMON ARAUJO<br>
+                CONSULTORIA EM TECNOLOGIA DA<br>
+                INFORMACAO LTDA</h1>
+            <p>Treviso street 202, Bandeirantes, Minas Gerais, Brazil Post Code CEP 31340-320</p>
+        </div>
+
+        <div class="title">
+            <h2>Invoice</h2>
+        </div>
+        <div class="flex-container">
+            <div class="address">
+                <p>NUNET UTILITY LTD.<br>
+                   Ground Floor, The Sotheby Building,<br>
+                   Rodney Village, Rodney Bay, Gros-Islet<br>
+                   Saint Lucia<br>
+                   Company Reg. No. 2021-00199</p>
+            </div>
+        </div>
+
+        <div class="flex-container">
+            <div class="details">
+                Date: {{ date }}
+                <br>
+                INV {{ '%04d'|format(invoice_number) }}
+            </div>
+        </div>
+
+        <table>
+            <tr>
+                <th>Description</th>
+                <th>Currency</th>
+                <th>Quantity</th>
+                <th>Price USD</th>
+                <th>Amount USD</th>
+                <th>Amount EUR</th>
+                <th>Worth Token</th>
+            </tr>
+            <tr>
+                <td>REF.: DevOps Engineering<br>
+                    Services provided for the period of:<br>
+                   {{ invoice_from_date }} to {{ invoice_to_date }}</td>
+                <td>NTX</td>
+                <td>1 month</td>
+                <td>${{ '%.2f'|format(amount_usd) }}</td>
+                <td>${{ '%.2f'|format(amount_usd) }}</td>
+                <td>€{{ '%.2f'|format(amount_eur) }}</td>
+                <td>{{ (amount_ntx)|int }}</td>
+            </tr>
+            <trate>
+                <tr>
+                    <td colspan="4">
+                        </th>
+                    <td id="rate">Rate:</th>
+                    <td id="usd-eur">{{ '%.4f'|format(usd_eur_rate) }} USD/EUR</td>
+                    <td id="eur-ntx">{{ '%.4f'|format(eur_ntx_rate) }} EUR/NTX</td>
+                </tr>
+            </trate>
+            <ttotal>
+                <tr>
+                    <th colspan="4"></th>
+                    <th id="total" colspan="2">Total:</th>
+                    <th>{{ (amount_ntx)|int }}</th>
+                </tr>
+            </ttotal>
+        </table>
+
+        <div class="disclaimer">
+            <p>Amount Payable: In NTX</p>
+            <p id="declaration">I hereby declare that I understand I am responsible for my own taxes</p>
+        </div>
+
+        <div class="conversion">
+            <div id="conversion-header">Currency conversion on {{ fiat_rate_date }} (fiat) and {{ token_rate_date }} (token) from:</div>
+            <a href="https://data.ecb.europa.eu/currency-converter" id="fiat-conversion-url">https://data.ecb.europa.eu/currency-converter</a>
+            <br>
+            <a href="https://coinmarketcap.com/currencies/nunet/historical-data/" id="token-conversion-url">https://coinmarketcap.com/currencies/nunet/historical-data/</a>
+        </div>
+
+        <div class="wallet-details">
+            <br>
+            <p><strong>Cardano Wallet Details (address):</strong><br>
+               addr1qxx6hx5wugn6nkztzk86fxa3xuqe5uxfhh2plsrzf37c7rxag525ets8487kca9fvkauywnvgq6k5csdnkp2js4j9uwqaquvkd</p>
+        </div>
+    </div>
+</body>
+</html>
