@@ -32,6 +32,7 @@ uv run main.py [-h] -d DATE [-i FIRST_INVOICE_DATE] [-t TOKEN_AMOUNT_USD] [-f FI
 - `-i, --first-invoice-date`: Date of first invoice (default: 2024-03-01)
 - `-t, --token-amount-usd`: Amount in USD for token payment (default: 1500)
 - `-f, --fiat-amount-usd`: Amount in USD for fiat payment (default: 3500)
+- `-r, --recreate`: If invoice exists, recreate invoice with fresh conversion values (deafult: False)
 
 ### Examples
 
