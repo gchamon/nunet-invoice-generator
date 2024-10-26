@@ -22,8 +22,6 @@ uv sync
 
 ## Usage
 
-The tool accepts several command-line arguments to customize the invoice generation:
-
 ```bash
 uv run main.py [-h] -d DATE [-i FIRST_INVOICE_DATE] [-t TOKEN_AMOUNT_USD] [-f FIAT_AMOUNT_USD]
 ```
@@ -59,6 +57,11 @@ for month in $(seq -f "%02g" 3 10); do
 done
 ```
 
+5. To convert the generated HTML files to PDF, use the convenience script:
+```bash
+./convert-html-to-pdf.sh
+```
+
 ## Output
 
 The tool generates two HTML files for each invoice date:
@@ -76,21 +79,16 @@ Each invoice includes:
 ## Project Structure
 
 ```
-.
-├── main.py              # Main script
-├── style.css           # CSS styling for invoices
-├── templates/          # Jinja2 templates
-│   ├── token.j2       # Template for token invoices
-│   └── fiat.j2        # Template for fiat invoices
-├── requirements.txt    # Project dependencies
-└── README.md          # This file
+├──  convert-html-to-pdf.sh
+├──  main.py
+├──  pyproject.toml
+├──  README.md
+├──  style.css
+├──  templates
+│   ├──  fiat.j2
+│   └──  token.j2
+└──  uv.lock
 ```
-
-## Dependencies
-
-- jinja2: Template engine for generating HTML
-- requests: HTTP client for API calls
-- python-dateutil: Date manipulation utilities
 
 ## Notes
 
