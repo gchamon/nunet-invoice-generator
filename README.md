@@ -1,6 +1,7 @@
 # Invoice Generator
 
-A Python tool for generating HTML invoices with automatic currency conversion support. The tool fetches current exchange rates for USD/EUR from the European Central Bank and EUR/NTX from CoinMarketCap to generate both fiat and token payment invoices.
+A Python tool for generating HTML invoices with automatic currency conversion support.
+The tool fetches current exchange rates for USD/EUR from the European Central Bank and EUR/NTX from CoinMarketCap to generate both fiat and token payment invoices.
 
 ## Features
 
@@ -11,7 +12,9 @@ A Python tool for generating HTML invoices with automatic currency conversion su
 
 ## Installation
 
-This project uses `uv` for package management. To install dependencies:
+This project uses `uv` for package management. See <https://github.com/astral-sh/uv?tab=readme-ov-file#installation> for details.
+
+To install dependencies:
 
 ```bash
 # Create a new virtual environment and install dependencies
