@@ -5,6 +5,7 @@ import os
 from datetime import datetime
 from typing import Any, Dict, TypedDict
 
+import yaml
 import requests
 from dateutil.relativedelta import relativedelta
 from jinja2 import Template
@@ -15,6 +16,11 @@ class ExchangeRate(TypedDict):
 
     conversion_rate: float
     date: datetime
+
+
+def load_config(config_file: str):
+    with open(config_file) as config_fp:
+        return yaml.safe_load(config_fp)
 
 
 def get_template(filename: str) -> Template:
@@ -139,10 +145,7 @@ def main() -> None:
     It fetches current exchange rates and generates HTML invoices using templates.
 
     Command line arguments:
-        -d, --date: Invoice date (YYYY-MM-DD format)
-        -i, --first-invoice-date: Date of first invoice (default: 2024-03-01)
-        -t, --token-amount-usd: Amount in USD for token payment (default: 1500)
-        -f, --fiat-amount-usd: Amount in USD for fiat payment (default: 3500)
+        -c, --config: YAML config file name (default: config.yml)
 
     Raises:
         Exception: If requested date is before the first invoice date
@@ -151,42 +154,19 @@ def main() -> None:
         description="Generate token and fiat invoices with currency conversions"
     )
     parser.add_argument(
-        "-d", "--date", required=True, type=str, help="Invoice date (YYYY-MM-DD)"
+        "-c", "--config", type=str, default="config.yml", required=False
     )
-    parser.add_argument(
-        "-i",
-        "--first-invoice-date",
-        required=False,
-        type=str,
-        default="2024-03-01",
-        help="Date of first invoice (default: 2024-03-01)",
-    )
-    parser.add_argument(
-        "-t",
-        "--token-amount-usd",
-        required=False,
-        type=int,
-        default=1500,
-        help="Amount in USD for token payment (default: 1500)",
-    )
-    parser.add_argument(
-        "-f",
-        "--fiat-amount-usd",
-        required=False,
-        type=int,
-        default=3500,
-        help="Amount in USD for fiat payment (default: 3500)",
-    )
-    parser.add_argument(
-        "-r", "--recreate", action="store_true", default=False, required=False
-    )
+    parser.add_argument("-r", "--recreate", default=False, action="store_true")
+    parser.add_argument("-d", "--date", type=str)
     args = parser.parse_args()
 
-    token_amount_usd = args.token_amount_usd
-    fiat_amount_usd = args.fiat_amount_usd
+    config = load_config(args.config)
+
+    token_amount_usd = config["token_usd"]
+    fiat_amount_usd = config["fiat_usd"]
     date_str = args.date
     requested_date = datetime.strptime(date_str, "%Y-%m-%d")
-    first_invoice_date = datetime.strptime(args.first_invoice_date, "%Y-%m-%d")
+    first_invoice_date = datetime.strptime(config["invoice_start_month"], "%Y-%m")
 
     if requested_date < first_invoice_date:
         raise Exception(
@@ -243,6 +223,10 @@ def main() -> None:
                 "token_rate_date": eur_ntx_exchange_rate_obj["date"].strftime(
                     "%d-%b-%y"
                 ),
+                "company_name": config["company_name"],
+                "company_address": config["company_address"],
+                "service_description": config["service_description"],
+                "cardano_wallet_address": config["cardano_wallet_address"],
             },
         )
 
@@ -264,6 +248,11 @@ def main() -> None:
                 "fiat_rate_date": usd_eur_exchange_rate_obj["date"].strftime(
                     "%d-%b-%y"
                 ),
+                "company_name": config["company_name"],
+                "company_address": config["company_address"],
+                "service_description": config["service_description"],
+                "bank_name": config["bank_name"],
+                "bank_info": config["bank_info"],
             },
         )
         print("done")

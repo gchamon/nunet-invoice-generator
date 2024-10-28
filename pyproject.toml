@@ -8,6 +8,7 @@ dependencies = [
     "datetime>=5.5",
     "jinja2>=3.1.4",
     "python-dateutil>=2.9.0.post0",
+    "pyyaml>=6.0.2",
     "requests>=2.32.3",
     "weasyprint>=62.3",
 ]

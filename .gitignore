@@ -12,3 +12,4 @@ fiat/
 token/
 .aider*
 .env
+config.yml

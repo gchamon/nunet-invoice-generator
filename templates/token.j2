@@ -10,10 +10,8 @@
 <body>
     <div class="invoice-container">
         <div class="header">
-            <h1>GABRIEL CHAMON ARAUJO<br>
-                CONSULTORIA EM TECNOLOGIA DA<br>
-                INFORMACAO LTDA</h1>
-            <p>Treviso street 202, Bandeirantes, Minas Gerais, Brazil Post Code CEP 31340-320</p>
+            <h1>{{ company_name }}</h1>
+            <p>{{ company_address }}</p>
         </div>
 
         <div class="title">
@@ -48,8 +46,8 @@
                 <th>Worth Token</th>
             </tr>
             <tr>
-                <td>REF.: DevOps Engineering<br>
-                    Services provided for the period of:<br>
+                <td>REF.: {{ service_description }}<br>
+                    provided for the period of:<br>
                    {{ invoice_from_date }} to {{ invoice_to_date }}</td>
                 <td>NTX</td>
                 <td>1 month</td>
@@ -91,7 +89,7 @@
         <div class="wallet-details">
             <br>
             <p><strong>Cardano Wallet Details (address):</strong><br>
-               addr1qxx6hx5wugn6nkztzk86fxa3xuqe5uxfhh2plsrzf37c7rxag525ets8487kca9fvkauywnvgq6k5csdnkp2js4j9uwqaquvkd</p>
+               {{ cardano_wallet_address }}</p>
         </div>
     </div>
 </body>
