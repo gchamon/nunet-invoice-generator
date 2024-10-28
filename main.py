@@ -8,6 +8,7 @@ from typing import Any, Dict, TypedDict
 import yaml
 import requests
 from dateutil.relativedelta import relativedelta
+from dateutil.rrule import rrule, MONTHLY
 from jinja2 import Environment, FileSystemLoader, Template
 
 
@@ -157,105 +158,112 @@ def main() -> None:
         "-c", "--config", type=str, default="config.yml", required=False
     )
     parser.add_argument("-r", "--recreate", default=False, action="store_true")
-    parser.add_argument("-d", "--date", type=str)
     args = parser.parse_args()
 
     config = load_config(args.config)
 
     token_amount_usd = config["token_usd"]
     fiat_amount_usd = config["fiat_usd"]
-    date_str = args.date
-    requested_date = datetime.strptime(date_str, "%Y-%m-%d")
     first_invoice_date = datetime.strptime(config["invoice_start_month"], "%Y-%m")
-
-    if requested_date < first_invoice_date:
-        raise Exception(
-            f"{date_str} must come after first invoice from {args.first_invoice_date}"
-        )
-
-    invoice_number = relativedelta(requested_date, first_invoice_date).months + 1
-
-    invoice_from_date = datetime(requested_date.year, requested_date.month, 1)
-    invoice_to_date = datetime(
-        requested_date.year,
-        requested_date.month,
-        calendar.monthrange(requested_date.year, requested_date.month)[1],
-    )
-
-    if (
-        args.recreate is False
-        and os.path.isfile(get_html_filename("token", invoice_date=requested_date))
-        and os.path.isfile(get_html_filename("fiat", invoice_date=requested_date))
+    for requested_date in rrule(
+        freq=MONTHLY,
+        dtstart=datetime(
+            first_invoice_date.year,
+            first_invoice_date.month,
+            config["invoice_issue_day"],
+        ),
+        until=datetime.now(),
     ):
-        print(f"Invoices exist for {date_str} exists. Skipping...")
-    else:
-        print(f"retrieving exchange rates for {date_str}...")
-        usd_eur_exchange_rate_obj = get_eur_exchange_rate(requested_date)
-        eur_ntx_exchange_rate_obj = get_ntx_exchange_rate(requested_date)
-        usd_eur_exchange_rate = usd_eur_exchange_rate_obj["conversion_rate"]
-        eur_ntx_exchange_rate = eur_ntx_exchange_rate_obj["conversion_rate"]
+        date_str = requested_date.strftime("%Y-%m-%d")
 
-        print("usd to eur exchange rate:", usd_eur_exchange_rate)
-        print("eur to ntx exchange rate:", eur_ntx_exchange_rate)
+        if requested_date < first_invoice_date:
+            raise Exception(
+                f"{date_str} must come after first invoice from {args.first_invoice_date}"
+            )
 
-        eur_total_token = token_amount_usd / usd_eur_exchange_rate
-        ntx_total = eur_total_token / eur_ntx_exchange_rate
-        print("\nvalues for token invoice:")
-        print("USD to receive in token:", token_amount_usd)
-        print("EUR to receive in token:", eur_total_token)
-        print("NTX to receive:", ntx_total)
-        render_html_from_template(
-            "token",
-            invoice_date=requested_date,
-            template_data={
-                "invoice_number": invoice_number,
-                "amount_usd": token_amount_usd,
-                "amount_eur": eur_total_token,
-                "amount_ntx": ntx_total,
-                "date": requested_date.strftime("%d-%b-%Y"),
-                "invoice_from_date": invoice_from_date.strftime("%d-%b-%Y"),
-                "invoice_to_date": invoice_to_date.strftime("%d-%b-%Y"),
-                "usd_eur_rate": usd_eur_exchange_rate,
-                "eur_ntx_rate": eur_ntx_exchange_rate,
-                "fiat_rate_date": usd_eur_exchange_rate_obj["date"].strftime(
-                    "%d-%b-%y"
-                ),
-                "token_rate_date": eur_ntx_exchange_rate_obj["date"].strftime(
-                    "%d-%b-%y"
-                ),
-                "company_name": config["company_name"],
-                "company_address": config["company_address"],
-                "service_description": config["service_description"],
-                "cardano_wallet_address": config["cardano_wallet_address"],
-            },
+        invoice_number = relativedelta(requested_date, first_invoice_date).months + 1
+
+        invoice_from_date = datetime(requested_date.year, requested_date.month, 1)
+        invoice_to_date = datetime(
+            requested_date.year,
+            requested_date.month,
+            calendar.monthrange(requested_date.year, requested_date.month)[1],
         )
 
-        eur_total_fiat = fiat_amount_usd / usd_eur_exchange_rate
-        print("\nvalues for fiat invoice:")
-        print("USD to receive in fiat:", fiat_amount_usd)
-        print("EUR to receive in token:", eur_total_fiat)
-        render_html_from_template(
-            "fiat",
-            invoice_date=requested_date,
-            template_data={
-                "invoice_number": invoice_number,
-                "amount_usd": fiat_amount_usd,
-                "amount_eur": eur_total_fiat,
-                "date": requested_date.strftime("%d-%b-%Y"),
-                "invoice_from_date": invoice_from_date.strftime("%d-%b-%Y"),
-                "invoice_to_date": invoice_to_date.strftime("%d-%b-%Y"),
-                "usd_eur_rate": usd_eur_exchange_rate,
-                "fiat_rate_date": usd_eur_exchange_rate_obj["date"].strftime(
-                    "%d-%b-%y"
-                ),
-                "company_name": config["company_name"],
-                "company_address": config["company_address"],
-                "service_description": config["service_description"],
-                "bank_name": config["bank_name"],
-                "bank_info": config["bank_info"],
-            },
-        )
-        print("done")
+        if (
+            args.recreate is False
+            and os.path.isfile(get_html_filename("token", invoice_date=requested_date))
+            and os.path.isfile(get_html_filename("fiat", invoice_date=requested_date))
+        ):
+            print(f"Invoices exist for {date_str} exists. Skipping...")
+        else:
+            print(f"retrieving exchange rates for {date_str}...")
+            usd_eur_exchange_rate_obj = get_eur_exchange_rate(requested_date)
+            eur_ntx_exchange_rate_obj = get_ntx_exchange_rate(requested_date)
+            usd_eur_exchange_rate = usd_eur_exchange_rate_obj["conversion_rate"]
+            eur_ntx_exchange_rate = eur_ntx_exchange_rate_obj["conversion_rate"]
+
+            print("usd to eur exchange rate:", usd_eur_exchange_rate)
+            print("eur to ntx exchange rate:", eur_ntx_exchange_rate)
+
+            eur_total_token = token_amount_usd / usd_eur_exchange_rate
+            ntx_total = eur_total_token / eur_ntx_exchange_rate
+            print("\nvalues for token invoice:")
+            print("USD to receive in token:", token_amount_usd)
+            print("EUR to receive in token:", eur_total_token)
+            print("NTX to receive:", ntx_total)
+            render_html_from_template(
+                "token",
+                invoice_date=requested_date,
+                template_data={
+                    "invoice_number": invoice_number,
+                    "amount_usd": token_amount_usd,
+                    "amount_eur": eur_total_token,
+                    "amount_ntx": ntx_total,
+                    "date": requested_date.strftime("%d-%b-%Y"),
+                    "invoice_from_date": invoice_from_date.strftime("%d-%b-%Y"),
+                    "invoice_to_date": invoice_to_date.strftime("%d-%b-%Y"),
+                    "usd_eur_rate": usd_eur_exchange_rate,
+                    "eur_ntx_rate": eur_ntx_exchange_rate,
+                    "fiat_rate_date": usd_eur_exchange_rate_obj["date"].strftime(
+                        "%d-%b-%y"
+                    ),
+                    "token_rate_date": eur_ntx_exchange_rate_obj["date"].strftime(
+                        "%d-%b-%y"
+                    ),
+                    "company_name": config["company_name"],
+                    "company_address": config["company_address"],
+                    "service_description": config["service_description"],
+                    "cardano_wallet_address": config["cardano_wallet_address"],
+                },
+            )
+
+            eur_total_fiat = fiat_amount_usd / usd_eur_exchange_rate
+            print("\nvalues for fiat invoice:")
+            print("USD to receive in fiat:", fiat_amount_usd)
+            print("EUR to receive in token:", eur_total_fiat)
+            render_html_from_template(
+                "fiat",
+                invoice_date=requested_date,
+                template_data={
+                    "invoice_number": invoice_number,
+                    "amount_usd": fiat_amount_usd,
+                    "amount_eur": eur_total_fiat,
+                    "date": requested_date.strftime("%d-%b-%Y"),
+                    "invoice_from_date": invoice_from_date.strftime("%d-%b-%Y"),
+                    "invoice_to_date": invoice_to_date.strftime("%d-%b-%Y"),
+                    "usd_eur_rate": usd_eur_exchange_rate,
+                    "fiat_rate_date": usd_eur_exchange_rate_obj["date"].strftime(
+                        "%d-%b-%y"
+                    ),
+                    "company_name": config["company_name"],
+                    "company_address": config["company_address"],
+                    "service_description": config["service_description"],
+                    "bank_name": config["bank_name"],
+                    "bank_info": config["bank_info"],
+                },
+            )
+    print("done")
 
 
 if __name__ == "__main__":
