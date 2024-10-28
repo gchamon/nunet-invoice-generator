@@ -8,7 +8,7 @@ from typing import Any, Dict, TypedDict
 import yaml
 import requests
 from dateutil.relativedelta import relativedelta
-from jinja2 import Template
+from jinja2 import Environment, FileSystemLoader, Template
 
 
 class ExchangeRate(TypedDict):
@@ -33,8 +33,8 @@ def get_template(filename: str) -> Template:
     Returns:
         Jinja2 Template object
     """
-    with open(filename) as fp:
-        return Template(fp.read())
+    env = Environment(loader=FileSystemLoader(searchpath="./"))
+    return env.get_template(filename)
 
 
 def write_html(filename: str, contents: str) -> None:

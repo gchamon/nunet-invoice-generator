@@ -1,0 +1,3 @@
+{% macro nl2br(input) -%}
+  {{ input.replace("\n", "<br>") | safe }}
+{%- endmacro %}

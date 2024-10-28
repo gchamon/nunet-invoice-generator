@@ -1,3 +1,4 @@
+{% from 'templates/macros.j2' import nl2br %}
 {# Base invoice template for traditional fiat payment #}
 <!DOCTYPE html>
 <html>
@@ -10,8 +11,8 @@
 <body>
     <div class="invoice-container">
         <div class="header">
-            <h1>{{ company_name }}</h1>
-            <p>{{ company_address }}</p>
+            <h1>{{ nl2br(company_name) }}</h1>
+            <p>{{ nl2br(company_address) }}</p>
         </div>
 
         <div class="title">
@@ -85,7 +86,7 @@
         <div class="bank-details">
             <br>
             <p><strong>Bank Name: {{ bank_name }}</strong><br>
-               {{ bank_info }}</p>
+               {{ nl2br(bank_info) }}</p>
         </div>
     </div>
 </body>
