@@ -24,6 +24,10 @@ def load_config(config_file: str):
         return yaml.safe_load(config_fp)
 
 
+def diff_month(d1, d2):
+    return (d1.year - d2.year) * 12 + d1.month - d2.month
+
+
 def get_template(filename: str) -> Template:
     """
     Read and return a Jinja2 template from a file.
@@ -147,6 +151,7 @@ def main() -> None:
 
     Command line arguments:
         -c, --config: YAML config file name (default: config.yml)
+        -r, --recreate: If invoice exists, recreate invoice with fresh conversion values (deafult: False)
 
     Raises:
         Exception: If requested date is before the first invoice date
@@ -181,7 +186,7 @@ def main() -> None:
                 f"{date_str} must come after first invoice from {args.first_invoice_date}"
             )
 
-        invoice_number = relativedelta(requested_date, first_invoice_date).months + 1
+        invoice_number = diff_month(requested_date, first_invoice_date) + 1
 
         invoice_from_date = datetime(requested_date.year, requested_date.month, 1)
         invoice_to_date = datetime(
@@ -208,7 +213,7 @@ def main() -> None:
 
             eur_total_token = token_amount_usd / usd_eur_exchange_rate
             ntx_total = eur_total_token / eur_ntx_exchange_rate
-            print("\nvalues for token invoice:")
+            print(f"\nvalues for token invoice {invoice_number}:")
             print("USD to receive in token:", token_amount_usd)
             print("EUR to receive in token:", eur_total_token)
             print("NTX to receive:", ntx_total)
@@ -239,7 +244,7 @@ def main() -> None:
             )
 
             eur_total_fiat = fiat_amount_usd / usd_eur_exchange_rate
-            print("\nvalues for fiat invoice:")
+            print(f"\nvalues for fiat invoice {invoice_number}:")
             print("USD to receive in fiat:", fiat_amount_usd)
             print("EUR to receive in token:", eur_total_fiat)
             render_html_from_template(

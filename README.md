@@ -4,11 +4,9 @@ A Python tool for generating HTML invoices with automatic currency conversion su
 
 ## Features
 
+- Batch creating of invoices
 - Generates both fiat and token payment invoices
-- Automatic currency conversion using real-time exchange rates
-- Customizable invoice amounts
-- Support for generating multiple invoices in batch
-- HTML output with customizable styling
+- Automatic currency conversion using historical exchange rates
 
 ## Installation
 
@@ -28,10 +26,7 @@ uv run main.py [-h] -d DATE [-i FIRST_INVOICE_DATE] [-t TOKEN_AMOUNT_USD] [-f FI
 
 ### Arguments
 
-- `-d, --date`: Invoice date in YYYY-MM-DD format (required)
-- `-i, --first-invoice-date`: Date of first invoice (default: 2024-03-01)
-- `-t, --token-amount-usd`: Amount in USD for token payment (default: 1500)
-- `-f, --fiat-amount-usd`: Amount in USD for fiat payment (default: 3500)
+- `-c, --config`: YAML config file name (default: config.yml)
 - `-r, --recreate`: If invoice exists, recreate invoice with fresh conversion values (deafult: False)
 
 ### Examples
