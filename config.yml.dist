@@ -1,20 +1,19 @@
-token_usd: 1000
-fiat_usd: 2000
-company_name: |
-  YOUR
-  COMPANY
-  NAME
-company_address: YOUR COMPANY ADDRESS
-service_description: SERVICE DESCRIPTION
-bank_name: BANK NAME
-bank_info: |
-  Branch Address: 00001
-  Beneficiary's NAME: YOUR COMPANY ADDRESS
-  IBAN: IBAN#
-  SWIFT: SWIFT#
-cardano_wallet_address: addrWALLET_ADDRESS
-invoice_start_month: 2024-01
-invoice_issue_day: 20
-create_token_invoice: true
-create_fiat_invoice: true
-
+token_usd: 1000                 # Amount in USD for token invoices
+fiat_usd: 2000                  # Amount in USD for fiat invoices
+company_name: |                 # Company name to appear on invoices
+  Your
+  Company
+  Name
+company_address: "Full Address" # Company address for invoices
+service_description: "Service Description" # Description of services rendered
+bank_name: "Bank Name"          # Bank name for fiat invoices
+bank_info: |                    # Bank details for fiat invoices
+  Branch Address: XXXXX
+  IBAN: XXXXX
+  SWIFT: XXXXX
+cardano_wallet_address: addr1xxx # Cardano wallet address for token invoices
+invoice_filename_prefix: your_name # prefix to use to compose the filenames
+invoice_start_month: "2024-01"   # First month to generate invoices (YYYY-MM)
+invoice_issue_day: 20            # Day of month for invoice dates
+create_token_invoice: true       # Whether to generate token invoices
+create_fiat_invoice: true        # Whether to generate fiat invoices

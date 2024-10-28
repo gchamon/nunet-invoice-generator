@@ -4,9 +4,10 @@ A Python tool for generating HTML invoices with automatic currency conversion su
 
 ## Features
 
-- Batch creating of invoices
+- Automatic generation of invoices for multiple months
 - Generates both fiat and token payment invoices
 - Automatic currency conversion using historical exchange rates
+- Configuration-based setup
 
 ## Installation
 
@@ -18,51 +19,76 @@ uv venv --python 3.12
 uv sync
 ```
 
+## Configuration
+
+Copy the example configuration file and modify it according to your needs:
+
+```bash
+cp config.yml.dist config.yml
+```
+
+The configuration file (`config.yml`) supports the following options:
+
+```yaml
+token_usd: 1000                 # Amount in USD for token invoices
+fiat_usd: 2000                  # Amount in USD for fiat invoices
+company_name: |                 # Company name to appear on invoices
+  Your
+  Company
+  Name
+company_address: "Full Address" # Company address for invoices
+service_description: "Service Description" # Description of services rendered
+bank_name: "Bank Name"          # Bank name for fiat invoices
+bank_info: |                    # Bank details for fiat invoices
+  Branch Address: XXXXX
+  IBAN: XXXXX
+  SWIFT: XXXXX
+cardano_wallet_address: addr1xxx # Cardano wallet address for token invoices
+invoice_filename_prefix: your_name  # prefix to use to compose the filenames
+invoice_start_month: "2024-01"   # First month to generate invoices (YYYY-MM)
+invoice_issue_day: 20            # Day of month for invoice dates
+create_token_invoice: true       # Whether to generate token invoices
+create_fiat_invoice: true        # Whether to generate fiat invoices
+```
+
 ## Usage
 
 ```bash
-uv run main.py [-h] -d DATE [-i FIRST_INVOICE_DATE] [-t TOKEN_AMOUNT_USD] [-f FIAT_AMOUNT_USD]
+uv run main.py [-h] [-c CONFIG] [-r]
 ```
 
 ### Arguments
 
 - `-c, --config`: YAML config file name (default: config.yml)
-- `-r, --recreate`: If invoice exists, recreate invoice with fresh conversion values (deafult: False)
+- `-r, --recreate`: If invoice exists, recreate invoice with fresh conversion values (default: False)
 
 ### Examples
 
-1. Generate invoices for a specific date with default amounts:
+1. Generate all invoices using default config file:
 ```bash
-uv run main.py -d 2024-03-20
+uv run main.py
 ```
 
-2. Generate invoices with custom amounts:
+2. Generate invoices using a custom config file:
 ```bash
-uv run main.py -d 2024-03-20 -t 2000 -f 4000
+uv run main.py --config custom_config.yml
 ```
 
-3. Generate invoices with a different first invoice date:
+3. Regenerate all invoices with fresh exchange rates:
 ```bash
-uv run main.py -d 2024-03-20 -i 2024-02-01
+uv run main.py --recreate
 ```
 
-4. Generate multiple invoices for consecutive months (March to October):
-```bash
-for month in $(seq -f "%02g" 3 10); do
-    uv run main.py -d 2024-$month-20
-done
-```
-
-5. To convert the generated HTML files to PDF, use the convenience script:
+4. To convert the generated HTML files to PDF, use the convenience script:
 ```bash
 ./convert-html-to-pdf.sh
 ```
 
 ## Output
 
-The tool generates two HTML files for each invoice date:
-- Token invoice: `token/gabriel_chamon_MMM_YY.html`
-- Fiat invoice: `fiat/gabriel_chamon_MMM_YY.html`
+The tool generates two HTML files for each month between the start date and current date:
+- Token invoice: `token/YOUR_NAME_MMM_YY.html`
+- Fiat invoice: `fiat/YOUR_NAME_MMM_YY.html`
 
 Each invoice includes:
 - Invoice number (automatically incremented)
@@ -75,15 +101,16 @@ Each invoice includes:
 ## Project Structure
 
 ```
-├──  convert-html-to-pdf.sh
-├──  main.py
-├──  pyproject.toml
-├──  README.md
-├──  style.css
-├──  templates
-│   ├──  fiat.j2
-│   └──  token.j2
-└──  uv.lock
+├──  convert-html-to-pdf.sh
+├──  main.py
+├──  pyproject.toml
+├──  README.md
+├──  style.css
+├──  config.yml.dist
+├──  templates
+│   ├──  fiat.j2
+│   └──  token.j2
+└──  uv.lock
 ```
 
 ## Notes
@@ -94,3 +121,4 @@ Each invoice includes:
 - The tool requires internet connection to fetch current exchange rates
 - Generated invoices use the exchange rates from the specified date
 - If the exchange rate is not available for the specified date, the tool will use the most recent available rate within the last 2 days
+- The tool automatically generates invoices for all months between the start date specified in config.yml and the current date

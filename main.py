@@ -54,7 +54,9 @@ def write_html(filename: str, contents: str) -> None:
         html_fp.write(contents)
 
 
-def get_html_filename(template_name: str, invoice_date: datetime) -> str:
+def get_html_filename(
+    template_name: str, invoice_date: datetime, invoice_filename_prefix: str
+) -> str:
     """
     Gets html filename from template name and requested date.
     For instance, "token" and a invoice date of "2024-10-20" will result in
@@ -69,11 +71,14 @@ def get_html_filename(template_name: str, invoice_date: datetime) -> str:
     """
 
     formatted_invoice_date = invoice_date.strftime("%b_%y")
-    return f"{template_name}/gabriel_chamon_{formatted_invoice_date}.html"
+    return f"{template_name}/{invoice_filename_prefix}_{formatted_invoice_date}.html"
 
 
 def render_html_from_template(
-    template_name: str, invoice_date: datetime, template_data: Dict[str, Any]
+    template_name: str,
+    invoice_date: datetime,
+    invoice_filename_prefix: str,
+    template_data: Dict[str, Any],
 ) -> None:
     """
     Render HTML invoice from a template and save it to a file.
@@ -88,7 +93,9 @@ def render_html_from_template(
 
     template_filename = f"templates/{template_name}.j2"
     os.makedirs(template_name, exist_ok=True)
-    html_filename = get_html_filename(template_name, invoice_date)
+    html_filename = get_html_filename(
+        template_name, invoice_date, invoice_filename_prefix
+    )
     template = get_template(template_filename)
     html_contents = template.render(template_data)
 
@@ -169,6 +176,7 @@ def main() -> None:
 
     token_amount_usd = config["token_usd"]
     fiat_amount_usd = config["fiat_usd"]
+    invoice_filename_prefix = config["invoice_filename_prefix"]
     first_invoice_date = datetime.strptime(config["invoice_start_month"], "%Y-%m")
     for requested_date in rrule(
         freq=MONTHLY,
@@ -197,8 +205,20 @@ def main() -> None:
 
         if (
             args.recreate is False
-            and os.path.isfile(get_html_filename("token", invoice_date=requested_date))
-            and os.path.isfile(get_html_filename("fiat", invoice_date=requested_date))
+            and os.path.isfile(
+                get_html_filename(
+                    "token",
+                    invoice_filename_prefix=invoice_filename_prefix,
+                    invoice_date=requested_date,
+                )
+            )
+            and os.path.isfile(
+                get_html_filename(
+                    "fiat",
+                    invoice_filename_prefix=invoice_filename_prefix,
+                    invoice_date=requested_date,
+                )
+            )
         ):
             print(f"Invoices exist for {date_str} exists. Skipping...")
         else:
@@ -220,6 +240,7 @@ def main() -> None:
             render_html_from_template(
                 "token",
                 invoice_date=requested_date,
+                invoice_filename_prefix=invoice_filename_prefix,
                 template_data={
                     "invoice_number": invoice_number,
                     "amount_usd": token_amount_usd,
@@ -250,6 +271,7 @@ def main() -> None:
             render_html_from_template(
                 "fiat",
                 invoice_date=requested_date,
+                invoice_filename_prefix=invoice_filename_prefix,
                 template_data={
                     "invoice_number": invoice_number,
                     "amount_usd": fiat_amount_usd,
