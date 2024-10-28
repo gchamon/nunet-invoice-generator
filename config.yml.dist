@@ -1,0 +1,20 @@
+token_usd: 1000
+fiat_usd: 2000
+company_name: |
+  YOUR
+  COMPANY
+  NAME
+company_address: YOUR COMPANY ADDRESS
+service_description: SERVICE DESCRIPTION
+bank_name: BANK NAME
+bank_info: |
+  Branch Address: 00001
+  Beneficiary's NAME: YOUR COMPANY ADDRESS
+  IBAN: IBAN#
+  SWIFT: SWIFT#
+cardano_wallet_address: addrWALLET_ADDRESS
+invoice_start_month: 2024-01
+invoice_issue_day: 20
+create_token_invoice: true
+create_fiat_invoice: true
+
